@@ -14,4 +14,18 @@
 docker compose up --build
 ```
 
+Или можно просто запустить командой `make`
+
 ## Для тестов
+
+1. Установить pytest + pytest_asyncio
+
+```sh
+pip install pytest pytest_asyncio
+```
+
+2. Запустить через make
+
+```
+make run-tests
+```
