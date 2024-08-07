@@ -1,0 +1,50 @@
+version: "3"
+services:
+
+  prod:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: treebo-test-task
+    depends_on:
+      - postgres 
+      - redis
+    env_file:
+      - .env
+
+  postgres:
+    container_name: postgres_container
+    image: postgres:16
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /data/postgres
+    volumes:
+       - /data/postgres:/data/postgres
+    ports:
+      - "${POSTGRES_PORT:-5432}:${POSTGRES_PORT:-5432}"
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4.0
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:${REDIS_PORT:-6379}"
+    volumes:
+      - /dаta/redis:/root/redis
+      - /redis.conf:/usr/local/etc/redis/redis.conf
+    env_file:
+      - .env
+
+  arq:
+    command: python -m arq src.notifications.WorkerSettings
+    build: .
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - prod
+    env_file:
+      - .env
